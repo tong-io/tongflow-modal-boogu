@@ -1,0 +1,8 @@
+{
+    "plugin": {
+        "name": "Boogu Image",
+        "description": "Text-to-image and single-reference image editing with Boogu-Image-0.1 — strongest at dense bilingual (zh/en) text rendering: posters, documents, in-image text edits.",
+        "icon": "/plugins/tongflow-modal-boogu.svg"
+    },
+    "env": []
+}
