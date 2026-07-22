@@ -84,7 +84,7 @@ image = (
         # doesn't fail the whole image build.
         f"cd {BOOGU_DIR} && python utils/get_flash_attn.py || true",
     )
-    .pip_install("tongflow==0.1.2")
+    .pip_install("tongflow==0.2.13", "fastapi[standard]")
     .env(
         {
             "device": "cuda:0",  # required by the Boogu pipeline
@@ -159,6 +159,21 @@ class GenInference:
             seed=int(input.seed) if input.seed is not None else 0,
         )
         return ImageGenOutput(success=True, image=asset(raw, mime="image/png"))
+
+    @modal.fastapi_endpoint(method="GET", label=f"{Path(__file__).resolve().parent.name}-geninference-serve")
+    def serve(self, taskId: str = "", token: str = "", origin: str = ""):
+        from fastapi.responses import StreamingResponse
+        from tongflow import serve_stream_from_spec
+
+        return StreamingResponse(
+            serve_stream_from_spec(
+                origin, taskId, token, __file__,
+                invoke=lambda m, inp: getattr(self, m).local(inp),
+            ),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*"},
+        )
+
 
 
 # ── image_edit (TI2I) — Boogu-Image-0.1-Edit ──────────────────────────────────
@@ -246,3 +261,18 @@ class EditInference:
             height=input.height,
         )
         return ImageEditOutput(success=True, image=asset(raw, mime="image/png"))
+
+    @modal.fastapi_endpoint(method="GET", label=f"{Path(__file__).resolve().parent.name}-editinference-serve")
+    def serve(self, taskId: str = "", token: str = "", origin: str = ""):
+        from fastapi.responses import StreamingResponse
+        from tongflow import serve_stream_from_spec
+
+        return StreamingResponse(
+            serve_stream_from_spec(
+                origin, taskId, token, __file__,
+                invoke=lambda m, inp: getattr(self, m).local(inp),
+            ),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*"},
+        )
+
