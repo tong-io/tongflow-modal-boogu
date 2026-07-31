@@ -84,7 +84,7 @@ image = (
         # doesn't fail the whole image build.
         f"cd {BOOGU_DIR} && python utils/get_flash_attn.py || true",
     )
-    .pip_install("tongflow==0.2.13", "fastapi[standard]")
+    .pip_install("tongflow==0.2.20", "fastapi[standard]")
     .env(
         {
             "device": "cuda:0",  # required by the Boogu pipeline
